@@ -86,6 +86,7 @@ def main():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(host, port=port, username=username, password=password)
+        print("Connected. Starting transfer...")
         sftp = ssh.open_sftp()
         sftp_upload(sftp, source, destination)
         sftp.close()
