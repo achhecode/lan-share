@@ -42,7 +42,6 @@ def sftp_upload(sftp, local_path, remote_path):
 
 def main():
     load_dotenv()
-    username = os.getenv("USERNAME")
     password = os.getenv("PASSWORD")
     ssh_string = os.getenv("SSH")
     source = os.getenv("SOURCE")
@@ -51,7 +50,7 @@ def main():
 
     # Check for missing values
     missing = []
-    for var, val in [("USERNAME", username), ("PASSWORD", password), ("SSH", ssh_string), ("SOURCE", source), ("DESTINATION", destination)]:
+    for var, val in [("PASSWORD", password), ("SSH", ssh_string), ("SOURCE", source), ("DESTINATION", destination)]:
         if not val:
             missing.append(var)
     if missing:
@@ -62,10 +61,7 @@ def main():
     if '@' not in ssh_string:
         print("Error: SSH must be in the format user@host")
         sys.exit(1)
-    user, host = ssh_string.split('@', 1)
-    if user != username:
-        print("Error: USERNAME in .env and user in SSH string do not match.")
-        sys.exit(1)
+    username, host = ssh_string.split('@', 1)
 
     # Check source existence
     if not os.path.exists(source):
