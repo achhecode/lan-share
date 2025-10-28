@@ -4,22 +4,20 @@ from dotenv import load_dotenv
 import sys
 
 def sftp_upload(sftp, local_path, remote_path):
+    # Ignore .DS_Store files and folders
+    if os.path.basename(local_path) == ".DS_Store":
+        return
     print(f"Uploading '{local_path}' to '{remote_path}'...")
-    # If remote_path is a directory, append filename
     try:
         if os.path.isfile(local_path):
             try:
-                # Check if remote_path is a directory
                 attr = sftp.stat(remote_path)
                 if str(attr.st_mode).startswith('16877') or remote_path.endswith('/'):
-                    # It's a directory, append filename
                     remote_path = os.path.join(remote_path, os.path.basename(local_path))
             except IOError:
-                # If stat fails, assume it's a file path
                 pass
             sftp.put(local_path, remote_path)
         else:
-            # Ensure remote parent directory exists
             parent = os.path.dirname(remote_path)
             try:
                 sftp.stat(parent)
@@ -29,8 +27,10 @@ def sftp_upload(sftp, local_path, remote_path):
             try:
                 sftp.mkdir(remote_path)
             except IOError:
-                pass  # Directory may already exist
+                pass
             for item in os.listdir(local_path):
+                if item == ".DS_Store":
+                    continue
                 sftp_upload(
                     sftp,
                     os.path.join(local_path, item),
@@ -70,12 +70,10 @@ def main():
 
     # Check source/destination type compatibility
     if os.path.isdir(source):
-        # Destination must be a directory (end with /)
         if not (destination.endswith("/")):
             print("Error: SOURCE is a directory, but DESTINATION is not a directory (must end with '/').")
             sys.exit(1)
     elif os.path.isfile(source):
-        # Destination must be a file (not end with /)
         if destination.endswith("/"):
             print("Error: SOURCE is a file, but DESTINATION is a directory (must not end with '/').")
             sys.exit(1)
